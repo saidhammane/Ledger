@@ -1,0 +1,1 @@
+SheetJS Community Edition 0.20.3, downloaded from https://cdn.sheetjs.com/xlsx-0.20.3/package/dist/xlsx.full.min.js. Distributed under the Apache 2.0 license; the distribution includes its copyright and license notice. Used locally for Excel backup import/export.

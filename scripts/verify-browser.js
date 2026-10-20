@@ -1,0 +1,51 @@
+import {chromium} from '@playwright/test';
+import assert from 'node:assert/strict';
+const browser = await chromium.launch({executablePath:process.env.BROWSER_PATH || 'C:/Program Files/BraveSoftware/Brave-Browser/Application/brave.exe',headless:true});
+const page = await browser.newPage();
+const errors=[]; page.on('pageerror',e=>errors.push(e.message));
+const id = `Browser verification ${Date.now()}`;
+try {
+  await page.goto('http://127.0.0.1:3000');
+  if (await page.locator('#authScreen').isVisible()) {
+    await page.locator('[data-auth-tab="register"]').click();
+    await page.locator('[data-auth-form="register"] [name=name]').fill('Browser verifier');
+    await page.locator('[data-auth-form="register"] [name=email]').fill(`browser-${Date.now()}@example.com`);
+    await page.locator('[data-auth-form="register"] [name=password]').fill('Browser-test-password-123');
+    await page.locator('[data-auth-form="register"] button.primary').click();
+  }
+  await page.locator('#connectionStatus').filter({hasText:'Database connected'}).waitFor();
+  await page.locator('#addLoan').click();
+  await page.locator('#loanForm [name=who]').fill(id);
+  await page.locator('#loanForm [name=total]').fill('1000');
+  await page.locator('#loanForm [name=installment]').fill('100');
+  await page.locator('#loanForm [name=dueDate]').fill('2026-01-31');
+  await page.locator('#loanForm [name=method]').selectOption('Cash');
+  await page.locator('#loanForm button.primary').click();
+  await page.locator('#loanDialog').waitFor({state:'hidden'});
+  await page.reload();
+  const row=page.locator('#loanRows tr').filter({hasText:id});
+  await row.waitFor();
+  await row.getByRole('button',{name:'Payments',exact:true}).click();
+  await page.locator('#paymentForm [name=amount]').fill('100');
+  await page.locator('#paymentForm button.primary').click();
+  await page.locator('#paymentRows').getByText('100.00 MAD').waitFor();
+  await page.locator('[data-close=paymentDialog]').click();
+  await page.reload();
+  await row.getByText('900.00 MAD',{exact:true}).waitFor();
+  const downloadEvent = page.waitForEvent('download');
+  await page.locator('#exportBtn').click();
+  const download = await downloadEvent;
+  await download.saveAs('.runtime/verification-backup.xlsx');
+  page.on('dialog',d=>d.accept());
+  await page.locator('#importFile').setInputFiles('.runtime/verification-backup.xlsx');
+  await page.locator('#notice').filter({hasText:'Excel data imported successfully'}).waitFor();
+  await row.getByText('900.00 MAD',{exact:true}).waitFor();
+  await page.screenshot({path:'.runtime/dashboard-desktop.png',fullPage:true});
+  await page.setViewportSize({width:390,height:844});
+  await page.screenshot({path:'.runtime/dashboard-mobile.png',fullPage:true});
+  assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth > innerWidth),false,'Page has horizontal overflow');
+  await row.getByRole('button',{name:'Delete',exact:true}).click();
+  await row.waitFor({state:'detached'});
+  assert.deepEqual(errors,[]);
+  console.log('PASS: Browser creates a loan, reloads persisted data, records payment, verifies balance, deletes loan, and renders mobile without page overflow.');
+} finally { await browser.close(); }
