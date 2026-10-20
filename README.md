@@ -2,6 +2,10 @@
 
 Personal loan, cheque, income, and repayment tracking with a Node.js API and MySQL database. The dashboard retains Excel import/export, search, reminders, and weekly/monthly installment calculations.
 
+## Description
+
+Ledger is a private finance tracker for managing personal loans and shared repayment workflows. It provides a browser dashboard backed by a Node.js API and MySQL, with support for Excel backup/import, installment planning, account-based access, and agreement-based repayment confirmation between users.
+
 ## Run on this computer
 
 Open PowerShell in this folder and run:
