@@ -1,0 +1,23 @@
+{
+  "version": 2,
+  "functions": {
+    "api/index.js": {
+      "runtime": "@vercel/node",
+      "includeFiles": "public/vendor/**"
+    }
+  },
+  "routes": [
+    {
+      "src": "/api/(.*)",
+      "dest": "/api/index.js"
+    },
+    {
+      "src": "/vendor/(.*)",
+      "dest": "/public/vendor/$1"
+    },
+    {
+      "src": "/(.*)",
+      "dest": "/index.html"
+    }
+  ]
+}

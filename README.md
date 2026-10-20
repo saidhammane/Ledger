@@ -16,6 +16,17 @@ Visit http://127.0.0.1:3000. Keep the terminal running. MySQL is a project-local
 
 Install Node.js 24 or newer and MySQL 8.4. Copy `.env.example` to `.env`, set your database connection and a random password of at least 20 characters, and run `npm install`. Set `DB_ADMIN_USER` and `DB_ADMIN_PASSWORD` for schema setup if needed, then run `npm run db:setup` and `npm start`. With a separately managed MySQL server, run `npm start` rather than the portable Windows launcher.
 
+## Deploy on Vercel
+
+This repository includes `vercel.json` and an API entrypoint at `api/index.js` for Vercel.
+
+1. Create a Vercel project from this repository.
+2. Add production environment variables: `NODE_ENV=production`, `DB_HOST`, `DB_PORT`, `DB_NAME`, `DB_USER`, `DB_PASSWORD`, and optionally `ALLOWED_ORIGINS` (comma-separated exact origins if you need to allow custom hostnames explicitly).
+3. Run schema setup once against your production MySQL instance (`npm run db:setup` from a trusted environment with DB admin credentials).
+4. Deploy. Vercel serves `index.html` and forwards `/api/*` to the Node function.
+
+If your domain changes, redeploy so requests use the correct host/origin checks.
+
 ## Data and backups
 
 On the first connection to an empty database, the dashboard offers to copy existing browser data into MySQL. It keeps the original localStorage backup. If the old page used another browser origin, export Excel from that page and import it into this app. Excel import replaces all app records after confirmation and validation. SheetJS 0.20.3 is bundled locally, so Excel backups work offline.
